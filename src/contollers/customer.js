@@ -1,4 +1,4 @@
-import { Customer } from "../models/customerModel"
+import { Customer } from "../models/customerModel.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import expressAsyncHandler from "express-async-handler"
@@ -18,7 +18,7 @@ export const registerCustomer = expressAsyncHandler(async(req, res)=>{
              return res.status(400).json({ error: "Email already in use", message: null})
         }
 
-        const hashedPassword = bcrypt.hash(password,10)
+        const hashedPassword = await bcrypt.hash(password,10)
 
         const customer = await Customer.create({
             name,
@@ -26,7 +26,7 @@ export const registerCustomer = expressAsyncHandler(async(req, res)=>{
             password:hashedPassword
         })
 
-        if(user) {
+        if(customer) {
             res.status(201).json({
                 _id: customer._id,
                 name: customer.name,

@@ -1,11 +1,11 @@
 import express from "express"
 import dotenv from "dotenv"
-import { dbConnect } from "./src/utils/utils"
+import { dbConnect } from "./src/utils/utils.js"
 import helmet from "helmet"
 import morgan from "morgan"
 import cors from "cors"
-import { errorHandler, notFoundErrorHandler } from "./src/middleware/errorHandler"
-import userRouter from "./src/routes/customerRouter"
+import { errorHandler, notFoundErrorHandler } from "./src/middleware/errorHandler.js"
+import customerRouter from "./src/routes/customerRouter.js"
 
 dotenv.config()
 
@@ -22,7 +22,7 @@ app.use(cors())
 
 
 //* API routes
-app.use("/api/user", userRouter)
+app.use("/api/customer", customerRouter)
 
 
 //* Error handler middleware

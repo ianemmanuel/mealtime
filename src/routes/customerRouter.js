@@ -1,5 +1,5 @@
 import express from 'express'
-import { registerCustomer } from "../contollers/customer"
+import { registerCustomer } from "../contollers/customer.js"
 
 const customerRouter = express.Router()
 
