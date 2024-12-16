@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken"
-import CustomError from "../contollers/customError.js"
+import CustomError from "./customError.js"
 import expressAsyncHandler from "express-async-handler"
 
 

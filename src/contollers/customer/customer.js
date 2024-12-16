@@ -1,5 +1,5 @@
 import { Customer } from "../../models/customers/customerModel.js"
-import CustomError from "../customError.js"
+import CustomError from "../../middleware/customError.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import expressAsyncHandler from "express-async-handler"

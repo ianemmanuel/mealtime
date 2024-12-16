@@ -6,15 +6,21 @@ import {
     updateProfile,
     deleteProfile,
 } from "../contollers/customer/profile.js"
-import { verifyJWT } from '../middleware/verifyJWT.js';
+import { customerRefreshTokenRouter } from "./refreshTokenRouter.js"
+import { customerLogoutRouter } from "./logoutRouter.js"
+import { verifyJWT } from '../middleware/verifyJWT.js'
+
 
 const customerRouter = express.Router();
 
-// Customer Authentication Routes
+//? Customer Authentication Routes
 customerRouter.post('/sign-up', registerCustomer)
 customerRouter.post('/login', loginCustomer)
-customerRouter.get('/logout', loginCustomer)
-// Profile Routes
+customerRouter.use('/refresh-token', customerRefreshTokenRouter)
+customerRouter.use('/logout', customerLogoutRouter)
+
+
+//? Profile Routes
 customerRouter.route('/profile')
     .post(verifyJWT,createProfile)
 
@@ -26,4 +32,4 @@ customerRouter.route('/profile/:slug')
 // Get Customer by ID
 //?customerRouter.get('/:id', verifyJWT,authorize("admin"),getCustomerById); // Define this route explicitly
 
-export default customerRouter;
+export default customerRouter
