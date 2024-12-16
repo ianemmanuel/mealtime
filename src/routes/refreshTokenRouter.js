@@ -1,10 +1,9 @@
-import express from 'express'
-import { handleRefreshToken } from "../contollers/refreshToken.js"
-
- export const refreshTokenRouter = express.Router()
-
-
-refreshTokenRouter.get('/', handleRefreshToken)
+import { createRefreshTokenRouter } from './generalRefreshTokenRouter.js'
+import { Customer } from '../models/customers/customerModel.js'
+import Restaurant  from '../models/restaurants/restaurantModel.js'
+//?import { Admin } from '../models/admin/adminModel.js'
 
 
-export default refreshTokenRouter
+export const customerRefreshTokenRouter = createRefreshTokenRouter(Customer)
+export const restaurantRefreshTokenRouter = createRefreshTokenRouter(Restaurant)
+//?export const adminRefreshTokenRouter = createRefreshTokenRouter(Admin)

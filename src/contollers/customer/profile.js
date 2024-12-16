@@ -1,7 +1,8 @@
 import { Profile } from "../../models/customers/profileModel.js"
 import { Customer } from "../../models/customers/customerModel.js"
 import expressAsyncHandler from "express-async-handler"
-import CustomError from "../customError.js"
+import CustomError from "../../middleware/customError.js"
+import { nanoid } from 'nanoid'
 
 //* @desc Create a new profile for a customer
 //* @route POST /api/profile
@@ -50,7 +51,7 @@ export const createProfile = expressAsyncHandler(async (req, res, next) => {
         message: "Profile created successfully",
         profile,
     });
-});
+})
 
 /*
  * @desc Get a user's profile
