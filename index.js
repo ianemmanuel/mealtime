@@ -5,13 +5,12 @@ import helmet from "helmet"
 import morgan from "morgan"
 import cors from "cors"
 import { errorHandler, notFoundErrorHandler } from "./src/middleware/errorHandler.js"
-import customerRouter from "./src/routes/customerRouter.js"
-import restaurantRouter from "./src/routes/restaurantRouter.js"
+import customerRouter from "./src/modules/customers/routes/customerRouter.js"
+import restaurantRouter from "./src/modules/restaurants/routes/restaurantRouter.js"
+import categoryRouter from "./src/modules/categories/routes/categoryRouter.js"
+import mealRouter from "./src/modules/meals/routes/mealRouter.js"
+import mealPlanRouter from "./src/modules/mealPlans/routes/mealPlanRouter.js"
 import cookieParser from "cookie-parser"
-
-import {restaurantRefreshTokenRouter, customerRefreshTokenRouter} from "./src/routes/refreshTokenRouter.js"
-import { verifyJWT } from './src/middleware/verifyJWT.js'
-
 
 
 dotenv.config()
@@ -44,6 +43,10 @@ app.use(cookieParser())
 //? API routes
 app.use("/api/customers", customerRouter)
 app.use("/api/restaurants", restaurantRouter)
+app.use("/api/categories", categoryRouter)
+app.use("/api/meals", mealRouter)
+app.use("/api/meal-plans", mealPlanRouter)
+
 
 const PORT = process.env.PORT || 8000
 //? Error handler middleware
