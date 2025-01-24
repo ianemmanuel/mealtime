@@ -1,5 +1,5 @@
-import { Profile } from "../../models/customers/profileModel.js"
-import { Customer } from "../../models/customers/customerModel.js"
+import { Profile } from "../models/profileModel.js"
+import { Customer } from "../models/customerModel.js"
 import expressAsyncHandler from "express-async-handler"
 import CustomError from "../../../middleware/customError.js"
 import { nanoid } from 'nanoid'

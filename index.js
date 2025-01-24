@@ -10,8 +10,9 @@ import restaurantRouter from "./src/modules/restaurants/routes/restaurantRouter.
 import categoryRouter from "./src/modules/categories/routes/categoryRouter.js"
 import mealRouter from "./src/modules/meals/routes/mealRouter.js"
 import mealPlanRouter from "./src/modules/mealPlans/routes/mealPlanRouter.js"
+import orderRouter from "./src/modules/orders/routes/orderRouter.js"
 import cookieParser from "cookie-parser"
-
+import { createRouteHandler } from "uploadthing/express"
 
 dotenv.config()
 
@@ -46,12 +47,13 @@ app.use("/api/restaurants", restaurantRouter)
 app.use("/api/categories", categoryRouter)
 app.use("/api/meals", mealRouter)
 app.use("/api/meal-plans", mealPlanRouter)
+app.use("/api/orders", orderRouter)
 
 
 const PORT = process.env.PORT || 8000
 //? Error handler middleware
 app.use(notFoundErrorHandler)
-app.use(errorHandler);
+app.use(errorHandler)
 app.listen(PORT, ()=>{
     console.log(`Server listening on port ${PORT}`)
 })

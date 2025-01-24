@@ -11,17 +11,29 @@ const addressSchema = new mongoose.Schema({
 
 
 const customerSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  name: { 
+    type: String, 
+    required: [true, "Name is required"] 
+  },
+  email: { 
+    type: String, 
+    required: [true, "Email is required"], 
+    unique: true,
+    trim: true
+  },
+  password: { 
+    type: String, 
+    required: true,
+    minLength:[6, "Password must be at least 6 characters long"],
+  },
   phone: { type: String },
   location: { type: String },
   address: addressSchema, 
   refreshToken: { type: String },
   role: { 
     type: String, 
-    enum: ["user"], 
-    default: "user" // Only "user" for this schema
+    enum: ["customer"], 
+    default: "customer" // Only "customer" for this schema
   },
   isActive: { type: Boolean, default: true },
   subscription: [
@@ -31,6 +43,12 @@ const customerSchema = new mongoose.Schema({
     endDate: Date,
     isActive: { type: Boolean, default: true },
     preferences: [String]
+    }
+  ],
+  cart: [
+    {
+      meal: { type: mongoose.Schema.Types.ObjectId, ref:"Meal", required: true },
+      unit: { type: Number, default: 1, required: true }
     }
   ],
   profile: { 

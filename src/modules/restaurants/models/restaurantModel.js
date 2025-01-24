@@ -11,10 +11,6 @@ const restaurantSchema = new mongoose.Schema(
       type: String,
       required: [true, "Email is required"],
       unique: true,
-      match: [
-        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
-        "Please add a valid email",
-      ],
       trim: true,
     },
     //? Address

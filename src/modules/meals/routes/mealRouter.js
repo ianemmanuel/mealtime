@@ -4,6 +4,8 @@ import {
   updateMeal,
   getMealBySlug,
   getAllMeals,
+  getFeaturedMeals,
+
 } from "../controllers/meal.js"
 import { verifyJWT } from '../../../middleware/verifyJWT.js'
 
@@ -14,8 +16,16 @@ mealRouter.route('/')
   .get(getAllMeals) 
   .post(verifyJWT, createMeal)
 
+mealRouter.route('/')
+  .get(getFeaturedMeals) 
+
 mealRouter.route('/:slug')
   .get(getMealBySlug) 
   .put(verifyJWT, updateMeal)
+
+
+
+
+
 
 export default mealRouter

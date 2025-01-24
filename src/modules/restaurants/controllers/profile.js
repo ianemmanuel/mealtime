@@ -2,6 +2,8 @@ import RestaurantProfile from "../models/restaurantProfileModel.js"
 import Restaurant  from "../models/restaurantModel.js"
 import expressAsyncHandler from "express-async-handler"
 import CustomError from "../../../middleware/customError.js"
+import Category from "../../categories/models/categoryModel.js"
+import Meal from "../../meals/models/mealModel.js"
 
 //* @desc Get a restaurant's profile
 //* @route GET /api/profiles/:slug
@@ -66,3 +68,48 @@ export const updateRestaurantProfile = expressAsyncHandler(async (req, res, next
         profile: updatedProfile,
     })
 })
+
+export const getRestaurantMealsByCategory = async (req, res, next) => {
+    try {
+      const { restaurantId, categoryId } = req.params
+  
+      const restaurant = await Restaurant.findOne({
+        _id: restaurantId,
+        //isActive: true,
+        //*isDeleted: false,
+      })
+  
+      if (!restaurant) {
+        return next(new CustomError("Restaurant not found bwanaa", 404))
+      }
+  
+      const category = await Category.findOne({
+        _id: categoryId,
+        restaurant: restaurantId,
+        isActive: true,
+        publish: true,
+      })
+      
+      if (!category) {
+        return next(new CustomError("Category not found for this restaurant", 404))
+      }
+  
+      const meals = await Meal.find({
+        restaurant: restaurantId,
+        categories: categoryId,
+        isActive: true,
+        isPublished: true,
+      })
+        .populate("categories", "name description") // Optional: Populate category details
+        .select("-__v -isPublished -isDeleted -isFeatured -isActive")
+      
+  
+      res.status(200).json({
+        message: "Meals fetched successfully",
+        data: meals,
+      })
+    } catch (error) {
+      console.error(error.message)
+      return next(new CustomError("Server error, try again later alaa", 500))
+    }
+  }
