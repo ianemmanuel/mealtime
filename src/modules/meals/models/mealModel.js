@@ -61,8 +61,10 @@ const mealSchema = new mongoose.Schema(
       averageRating: { type: Number, default: 0 },
       totalRatings: { type: Number, default: 0 },
     },
-    isFeatured: { type: Boolean, default: false }, // Highlighted meals
-    isActive: { type: Boolean, default: true }, // Toggle meal availability
+    isPublished: { type: Boolean, default: true },
+    isDeleted: { type: Boolean, default: false }, 
+    isFeatured: { type: Boolean, default: false }, 
+    isActive: { type: Boolean, default: true }, 
   },
   { timestamps: true }
 )

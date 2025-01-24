@@ -5,6 +5,7 @@ import Category from "../../categories/models/categoryModel.js"
 import slugify from "slugify"
 import { nanoid } from "nanoid"
 import expressAsyncHandler from "express-async-handler"
+import { redis } from "../../../lib/redis.js"
 
 const generateSlug = async (mealName, restaurantId) => {
   const restaurant = await Restaurant.findById(restaurantId)
@@ -27,93 +28,91 @@ const generateSlug = async (mealName, restaurantId) => {
 
 //* Create a Meal Controller
 export const createMeal = expressAsyncHandler(async (req, res, next) => {
-  const {
-    name,
-    description,
-    price,
-    restaurant,
-    categories,
-    dietaryPreferences,
-    nutritionalInfo,
-    ingredients,
-    images,
-    preparationTime,
-    tags,
-  } = req.body;
-
-  // Validate required fields
-  if (!name || !price || !restaurant) {
-    throw new CustomError("Name, price, and restaurant are required fields.", 400);
-  }
-
-  // Verify restaurant exists
-  const restaurantExists = await Restaurant.findById(restaurant);
-  if (!restaurantExists) {
-    throw new CustomError("The specified restaurant does not exist.", 404);
-  }
-
-  // Check for duplicate meal in the same restaurant
-  const existingMeal = await Meal.findOne({ name, restaurant });
-  if (existingMeal) {
-    throw new CustomError("A meal with this name already exists in the menu of the specified restaurant.", 400);
-  }
-
-  // Validate categories if provided
-  if (categories && categories.length > 0) {
-    const validCategories = await Category.find({ _id: { $in: categories } });
-    if (validCategories.length !== categories.length) {
-      throw new CustomError("One or more specified categories do not exist.", 400);
+  try{
+    const {
+      name,
+      description,
+      price,
+      restaurant,
+      categories,
+      dietaryPreferences,
+      nutritionalInfo,
+      ingredients,
+      images,
+      preparationTime,
+      tags,
+    } = req.body;
+  
+    if (!name || !price || !restaurant) {
+      return new CustomError("Name, price, and restaurant are required fields.", 400)
     }
+  
+    const restaurantExists = await Restaurant.findById(restaurant)
+    if (!restaurantExists) {
+      throw new CustomError("The specified restaurant does not exist.", 404)
+    }
+  
+    const existingMeal = await Meal.findOne({ name, restaurant })
+    if (existingMeal) {
+      throw new CustomError("A meal with this name already exists in the menu of the specified restaurant.", 400)
+    }
+  
+    if (categories && categories.length > 0) {
+      const validCategories = await Category.find({ _id: { $in: categories } })
+      if (validCategories.length !== categories.length) {
+        throw new CustomError("One or more specified categories do not exist.", 400)
+      }
+    }
+  
+    const slug = await generateSlug(name, restaurant)
+  
+    const formattedNutritionalInfo = nutritionalInfo?.map((info) => ({
+      name: info.name?.trim(),
+      value: info.value?.trim(),
+    }))
+  
+    const formattedIngredients = ingredients?.map((ingredient) =>
+      typeof ingredient === "string" ? ingredient.trim() : ""
+    )
+  
+    const formattedTags = tags?.map((tag) =>
+      typeof tag === "string" ? tag.trim() : ""
+    )
+  
+    const formattedImages = images?.map((image) => ({
+      url: image?.url?.trim(),
+      alt: image?.alt?.trim(),
+    }))
+  
+    //* Create and save the meal
+    const meal = await Meal.create({
+      name,
+      slug,
+      description,
+      price: {
+        amount: price.amount,
+        currency: price.currency || "USD",
+      },
+      restaurant,
+      categories,
+      dietaryPreferences,
+      nutritionalInfo: formattedNutritionalInfo,
+      ingredients: formattedIngredients,
+      images: formattedImages,
+      preparationTime: preparationTime || 0,
+      tags: formattedTags,
+    })
+  
+    return res.status(201).json({
+      success: true,
+      message: "Meal created successfully.",
+      meal,
+    })
+  }catch(error){
+    console.log(error)
+    return new CustomError("Internal server error", 500)
   }
 
-  // Generate slug for the meal
-  const slug = await generateSlug(name, restaurant);
-
-  // Format nutritional info
-  const formattedNutritionalInfo = nutritionalInfo?.map((info) => ({
-    name: info.name?.trim(),
-    value: info.value?.trim(),
-  }));
-
-  // Format ingredients, tags, and images
-  const formattedIngredients = ingredients?.map((ingredient) =>
-    typeof ingredient === "string" ? ingredient.trim() : ""
-  );
-
-  const formattedTags = tags?.map((tag) =>
-    typeof tag === "string" ? tag.trim() : ""
-  );
-
-  const formattedImages = images?.map((image) => ({
-    url: image?.url?.trim(),
-    alt: image?.alt?.trim(),
-  }));
-
-  // Create and save the meal
-  const meal = await Meal.create({
-    name,
-    slug,
-    description,
-    price: {
-      amount: price.amount,
-      currency: price.currency || "USD",
-    },
-    restaurant,
-    categories,
-    dietaryPreferences,
-    nutritionalInfo: formattedNutritionalInfo,
-    ingredients: formattedIngredients,
-    images: formattedImages,
-    preparationTime: preparationTime || 0,
-    tags: formattedTags,
-  });
-
-  // Return success response
-  return res.status(201).json({
-    success: true,
-    message: "Meal created successfully.",
-    meal,
-  })
 })
 
 export const updateMeal = expressAsyncHandler(async (req, res, next) => {
@@ -189,9 +188,32 @@ export const getAllMeals = expressAsyncHandler(async (req, res) => {
         .sort({ createdAt: -1 })
         
     if (!meals) {
-        return next(new CustomError("No meals present at the moment", 404));
+        return next(new CustomError("No meals present at the moment", 404))
     }
 
     return res.status(200).json({ meals });
 
 })
+
+export const getFeaturedMeals = async(req, res, next) => {
+  try {
+    let featuredMeals = await redis.get("featured-meals")
+
+    if (featuredMeals) {
+      return res.json(JSON.parse(featuredMeals))
+    }
+
+    featuredMeals = await Meal.find({isFeatured: true}).lean()
+
+    if (!featuredMeals) {
+      return next(new CustomError("No featured meals at the momen", 404))
+    }
+
+    await redis.set("featured-meals", JSON.stringify(featuredMeals))
+    res.status(200).json(featuredMeals)
+  }catch(error){
+    console.log(error.messsage)
+    return next(new CustomError("Server error, try again later", 500))
+  }
+}
+

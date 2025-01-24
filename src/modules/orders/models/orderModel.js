@@ -1,84 +1,29 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose"
+import SubOrder from "./subOrderModel.js"
 
-
-
-const orderItemsSchema = new mongoose.Schema({
-    mealkit:{
+const OrderSchema = new mongoose.Schema(
+  {
+    customer: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true },
+    subOrders: [
+      {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product',
-        required: true
+        ref: "SubOrder",
+      },
+    ], 
+    paymentStatus: {
+      type: String,
+      enum: ["Pending", "Paid", "Failed"],
+      default: "Pending",
     },
-    quantity: {
-        type: Number,
-        required: true,
-        min: 1
-    },
-    price: {
-        type: Number,
-        required: true
+    totalPrice: { type: Number, required: true }, //* Cumulative price of all sub-orders
+    stripeSessionId : {
+      type: String,
+      unique: true
     }
-}, {_id: false});
+  },
+  { timestamps: true }
+)
 
 
-const cancellationSchema = new mongoose.Schema({
-    reason: {
-        type: String,
-        required: true
-    },
-    date: {
-        type: Date,
-        default: Date.now()
-    }
-}, {_id: false});
-
-
-const returnSchema = new mongoose.Schema({
-    reason: {
-        type: String,
-        required: true
-    },
-    status: {
-        type: String,
-        enum: ['Pending','Approved','Denied'],
-        default:"Pending",
-    },
-    date: {
-        type: Date,
-        default: Date.now()
-    },
-}, {_id: false})
-
-
-const orderSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
-    items: [orderItemsSchema],
-    totalPrice: {
-        type: String,
-        required: true
-    },
-    status: {
-        type: String,
-        enum: ['Pending','Confirmed','Cancelled', 'Shipped', 'Delivered'],
-        default: 'Pending'
-    }, 
-    address: {
-        street:String,
-        city: String,
-        state: String,
-        zipCode: String,
-        country: String,
-    },
-    paymentMethod: {
-        type: String,
-        enum: ['PayPal', 'Credit Card', 'Google Pay', 'Mpesa'],
-        required: true
-    },
-    cancellation: cancellationSchema,
-    return: returnSchema,
-}, {timestamps: true})
-
-export const Order = mongoose.model('Order', orderSchema)
+const Order = mongoose.model("Order", OrderSchema);
+export default Order;

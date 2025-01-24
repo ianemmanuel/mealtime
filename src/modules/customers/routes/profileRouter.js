@@ -4,14 +4,15 @@ import {
     getProfile,
     updateProfile,
     deleteProfile,
-} from "../controllers/customerProfile"
+} from "../controllers/profile.js"
+import { verifyJWT } from '../../../middleware/verifyJWT.js'
 
 const customerProfileRouter = express.Router()
 //? Profile Routes
-customerProfileRouter.route('/profile')
+customerProfileRouter.route('/')
     .post(verifyJWT,createProfile)
 
-customerProfileRouter.route('/profile/:slug')
+customerProfileRouter.route('/:slug')
     .get(verifyJWT,getProfile)
     .put(verifyJWT,updateProfile)
     .delete(verifyJWT,deleteProfile)

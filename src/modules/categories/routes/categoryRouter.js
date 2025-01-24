@@ -20,4 +20,5 @@ categoryRouter.route('/:slug')
   .put(verifyJWT, updateCategory)
   .delete(verifyJWT, deleteCategory) 
 
+
 export default categoryRouter
