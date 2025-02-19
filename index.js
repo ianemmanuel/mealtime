@@ -1,6 +1,6 @@
 import express from "express"
 import dotenv from "dotenv"
-import { dbConnect } from "./src/utils/utils.js"
+import { dbConnect } from "./src/database/utils.js.js"
 import helmet from "helmet"
 import morgan from "morgan"
 import cors from "cors"
@@ -17,7 +17,7 @@ import { createRouteHandler } from "uploadthing/express"
 dotenv.config()
 
 //? connection to mongodb
-dbConnect()
+await dbConnect()
 
 const app = express()
 

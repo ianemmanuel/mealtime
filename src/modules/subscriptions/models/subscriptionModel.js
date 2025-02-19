@@ -1,6 +1,3 @@
-import mongoose from "mongoose";
-
-// Main Subscription Schema
 const subscriptionSchema = new mongoose.Schema({
     restaurantId: { 
         type: mongoose.Schema.Types.ObjectId, 
@@ -9,36 +6,61 @@ const subscriptionSchema = new mongoose.Schema({
     },
     name: { 
         type: String, 
-        required: true 
-    }, // e.g., "Weekly Vegan Plan"
-    description: { 
-        type: String 
-    }, // Details about the subscription
+        required: true,
+        trim: true,
+        minLength: 2,
+        maxLength: 200 
+    },
+    description: String, 
     price: { 
         type: Number, 
-        required: true 
-    }, // Total price for the plan
+        required: true, 
+        min: 0,
+    },
+    discount: { 
+        type: Number,
+        min: 1,
+    },
+    currency: {
+        type: String,
+        required: true
+    },
     duration: { 
-        type: String, 
-        enum: ["weekly", "monthly"], 
-        required: true 
+        type: Number, // Number of days per cycle (5-10)
+        required: true,
+        min: 5,
+        max: 10
+    },
+    cycles: { 
+        type: Number, // Number of cycles before expiration
+        required: true,
+        min: 1 // At least one cycle required
+    },
+    autoRenew: { 
+        type: Boolean, 
+        default: false 
+    },
+    deliveryWindow: { 
+        startTime: { type: String, required: true }, // e.g., "18:00"
+        endTime: { type: String, required: true }  // e.g., "19:30"
     },
     meals: [
         {
             mealId: { 
                 type: mongoose.Schema.Types.ObjectId, 
-                ref: "Meal" 
+                ref: "Meal",
+                required: true
             },
-            day: { 
-                type: String, 
-                enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] 
+            deliveryDate: { 
+                type: Date, 
+                required: true 
             }
         }
-    ], // Specific meals for each day
+    ],
     isActive: { 
         type: Boolean, 
         default: true 
-    } // If the subscription is currently being offered
+    }
 }, { timestamps: true });
 
 export const Subscription = mongoose.model("Subscription", subscriptionSchema);
